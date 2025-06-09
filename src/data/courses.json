@@ -1,8 +1,9 @@
 [
   {
-    "id": "course-FM8md2Op",
+    "id": "course-aVm8Dp4b",
     "title": "Lập Trình JavaScript Cơ Bản 2.0",
     "description": "Hello this is a new course",
+    "createdBy": "174948372417752ohesork",
     "videoIntroUrl": "https://www.youtube.com/",
     "document": {
       "type": "text",
@@ -11,25 +12,11 @@
     "videos": [],
     "registeredUsers": [
       {
-        "id": "user-1",
-        "email": "john.doe@example.com",
+        "id": "17494826347426g8rccbzw",
+        "email": "leanhkhoi2611@gmail.com",
         "role": "learner",
-        "registeredAt": "2024-01-15T10:30:00Z",
+        "registeredAt": "2025-06-09T18:07:35.993Z",
         "status": "active"
-      },
-      {
-        "id": "user-2",
-        "email": "jane.smith@example.com",
-        "role": "learner",
-        "registeredAt": "2024-01-16T14:20:00Z",
-        "status": "blocked"
-      },
-      {
-        "id": "user-3",
-        "email": "bob.wilson@example.com",
-        "role": "creator",
-        "registeredAt": "2024-01-17T09:15:00Z",
-        "status": "blocked"
       }
     ]
   }

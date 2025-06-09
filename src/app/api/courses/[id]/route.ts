@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as yup from 'yup';
 import { Course, updateCourseSchema } from '@/types/course';
 import { readCoursesFile, writeCoursesFile } from '@/utils/courseFileUtils';
+import { verifyToken } from '@/lib/auth';
 
 // GET - Get a single course by ID
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Verify JWT token
+    const tokenPayload = verifyToken(request);
+
+    if (!tokenPayload) {
+      return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
+    }
+
     const { id } = params;
     const courses = readCoursesFile();
 
@@ -13,6 +21,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     if (!course) {
       return NextResponse.json({ success: false, error: 'Course not found' }, { status: 404 });
+    }
+
+    // Check if the user owns this course
+    if (course.createdBy !== tokenPayload.userId) {
+      return NextResponse.json({ success: false, error: 'Access denied - You can only access your own courses' }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -28,6 +41,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 // PUT - Update a course by ID
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Verify JWT token
+    const tokenPayload = verifyToken(request);
+
+    if (!tokenPayload) {
+      return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
+    }
+
     const { id } = params;
     const body = await request.json();
 
@@ -55,7 +75,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ success: false, error: 'Course not found' }, { status: 404 });
     }
 
-    // Update the course
+    // Check if the user owns this course
+    if (courses[courseIndex].createdBy !== tokenPayload.userId) {
+      return NextResponse.json({ success: false, error: 'Access denied - You can only modify your own courses' }, { status: 403 });
+    }
+
+    // Update the course (preserve createdBy field)
     const updatedCourse: Course = {
       ...courses[courseIndex],
       title: body.title,
@@ -87,6 +112,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE - Delete a course by ID
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Verify JWT token
+    const tokenPayload = verifyToken(request);
+
+    if (!tokenPayload) {
+      return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
+    }
+
     const { id } = params;
 
     // Read existing courses
@@ -97,6 +129,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     if (courseIndex === -1) {
       return NextResponse.json({ success: false, error: 'Course not found' }, { status: 404 });
+    }
+
+    // Check if the user owns this course
+    if (courses[courseIndex].createdBy !== tokenPayload.userId) {
+      return NextResponse.json({ success: false, error: 'Access denied - You can only delete your own courses' }, { status: 403 });
     }
 
     // Get the course before deletion for response

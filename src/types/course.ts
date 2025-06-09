@@ -14,6 +14,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
+  createdBy: string; // User ID of the creator
   videoIntroUrl?: string;
   document?: {
     type: 'text' | 'pdf' | 'html';

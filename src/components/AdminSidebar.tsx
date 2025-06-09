@@ -12,13 +12,7 @@ import {
   BookOpenIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
-
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  createdAt: string;
-}
+import { useUser } from '@/contexts/UserContext';
 
 interface NavigationItem {
   name: string;
@@ -33,8 +27,8 @@ interface AdminSidebarProps {
 const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Manage Courses', href: '/admin/courses', icon: BookOpenIcon },
-  { name: 'Manage Learner', href: '#', icon: UserGroupIcon },
-  { name: 'Manage Pages', href: '#', icon: DocumentDuplicateIcon },
+  // { name: 'Manage Learner', href: '#', icon: UserGroupIcon },
+  // { name: 'Manage Pages', href: '#', icon: DocumentDuplicateIcon },
 ];
 
 function classNames(...classes: string[]) {
@@ -43,39 +37,33 @@ function classNames(...classes: string[]) {
 
 export default function AdminSidebar({ children }: AdminSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
+  // Use UserContext for authentication state
+  const { user, isLoading, isAuthenticated, logout } = useUser();
+
   useEffect(() => {
-    // Check if user is logged in and has creator role
-    const storedUser = localStorage.getItem('user');
-    const accessToken = localStorage.getItem('accessToken');
-
-    if (!storedUser || !accessToken) {
-      router.push('/login');
-      return;
+    // Only run redirect logic when not loading
+    if (!isLoading) {
+      if (!isAuthenticated || !user) {
+        router.push('/login');
+        return;
+      }
+      if (user.role !== 'creator') {
+        alert('Access denied. Creator role required.');
+        router.push('/login');
+        return;
+      }
     }
-
-    const userData = JSON.parse(storedUser);
-    if (userData.role !== 'creator') {
-      // Redirect non-creators to a different page or show error
-      alert('Access denied. Creator role required.');
-      router.push('/login');
-      return;
-    }
-
-    setUser(userData);
-  }, [router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('tokenType');
+    logout();
     router.push('/login');
   };
 
-  if (!user) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -145,8 +133,8 @@ export default function AdminSidebar({ children }: AdminSidebarProps) {
             </nav>
           </div>
 
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-            <div className="flex items-center">
+          <div className="flex-shrink-0 border-t border-gray-200 p-4">
+            <div className="flex items-center mb-3">
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                   <span className="text-sm font-medium text-white">{user.email.charAt(0).toUpperCase()}</span>
@@ -157,6 +145,13 @@ export default function AdminSidebar({ children }: AdminSidebarProps) {
                 <p className="text-xs font-medium text-gray-500 capitalize">{user.role}</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
+            >
+              <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+              Sign Out
+            </button>
           </div>
         </div>
       </div>
@@ -210,8 +205,8 @@ export default function AdminSidebar({ children }: AdminSidebarProps) {
               </nav>
             </div>
 
-            <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-              <div className="flex items-center w-full">
+            <div className="flex-shrink-0 border-t border-gray-200 p-4">
+              <div className="flex items-center mb-3">
                 <div className="flex-shrink-0">
                   <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                     <span className="text-sm font-medium text-white">{user.email.charAt(0).toUpperCase()}</span>
@@ -221,10 +216,14 @@ export default function AdminSidebar({ children }: AdminSidebarProps) {
                   <p className="text-sm font-medium text-gray-700 truncate">{user.email}</p>
                   <p className="text-xs font-medium text-gray-500 capitalize">{user.role}</p>
                 </div>
-                <button onClick={handleLogout} className="ml-2 flex-shrink-0 p-1 text-gray-400 hover:text-gray-500" title="Logout">
-                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                </button>
               </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
+              >
+                <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                Sign Out
+              </button>
             </div>
           </div>
         </div>

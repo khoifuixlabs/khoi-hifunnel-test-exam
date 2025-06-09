@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readCoursesFile, writeCoursesFile } from '@/utils/courseFileUtils';
+import { verifyToken } from '@/lib/auth';
 
 // PATCH - Toggle user status (active <-> blocked)
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Verify JWT token
+    const tokenPayload = verifyToken(request);
+
+    if (!tokenPayload) {
+      return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
+    }
+
     const { id: courseId } = params;
     const body = await request.json();
     const { userId } = body;
@@ -23,6 +31,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     const course = courses[courseIndex];
+
+    // Check if the user owns this course
+    if (course.createdBy !== tokenPayload.userId) {
+      return NextResponse.json({ success: false, error: 'Access denied - You can only manage users for your own courses' }, { status: 403 });
+    }
 
     // Find the user in the course's registered users
     if (!course.registeredUsers) {

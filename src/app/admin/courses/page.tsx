@@ -8,7 +8,7 @@ import CourseModal from '@/components/admin/CourseModal';
 import CourseDetailsModal from '@/components/admin/CourseDetailsModal';
 import RegisteredUsersModal from '@/components/admin/RegisteredUsersModal';
 
-type CourseFormData = Omit<Course, 'id'>;
+type CourseFormData = Omit<Course, 'id' | 'createdBy'>;
 
 export default function CoursesManagementPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -18,17 +18,37 @@ export default function CoursesManagementPage() {
   const [viewingCourse, setViewingCourse] = useState<Course | null>(null);
   const [managingUsersFor, setManagingUsersFor] = useState<Course | null>(null);
 
+  // Helper function to get authorization headers
+  const getAuthHeaders = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `${tokenType} ${accessToken}`,
+    };
+  };
+
   useEffect(() => {
     fetchCourses();
   }, []);
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/courses');
+      const response = await fetch('/api/courses', {
+        headers: getAuthHeaders(),
+      });
       const result = await response.json();
 
       if (result.success) {
         setCourses(result.data);
+      } else {
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login';
+        } else {
+          alert(`Error: ${result.error}`);
+        }
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -44,9 +64,7 @@ export default function CoursesManagementPage() {
 
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data),
       });
 
@@ -58,7 +76,12 @@ export default function CoursesManagementPage() {
         setEditingCourse(null);
         alert(editingCourse ? 'Course updated successfully!' : 'Course created successfully!');
       } else {
-        alert(`Error: ${result.error}${result.details ? ` - ${result.details}` : ''}`);
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login';
+        } else {
+          alert(`Error: ${result.error}${result.details ? ` - ${result.details}` : ''}`);
+        }
       }
     } catch (error) {
       console.error('Error saving course:', error);
@@ -75,6 +98,7 @@ export default function CoursesManagementPage() {
     try {
       const response = await fetch(`/api/courses/${courseId}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
 
       const result = await response.json();
@@ -83,7 +107,12 @@ export default function CoursesManagementPage() {
         await fetchCourses();
         alert('Course deleted successfully!');
       } else {
-        alert(`Error: ${result.error}`);
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login';
+        } else {
+          alert(`Error: ${result.error}`);
+        }
       }
     } catch (error) {
       console.error('Error deleting course:', error);
@@ -121,9 +150,7 @@ export default function CoursesManagementPage() {
     try {
       const response = await fetch(`/api/courses/${courseId}/toggle-user-status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ userId }),
       });
 
@@ -158,7 +185,12 @@ export default function CoursesManagementPage() {
 
         alert(result.message);
       } else {
-        alert(`Error: ${result.error}`);
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login';
+        } else {
+          alert(`Error: ${result.error}`);
+        }
       }
     } catch (error) {
       console.error('Error updating user status:', error);

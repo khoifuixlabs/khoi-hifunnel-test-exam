@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import FormInput from '@/components/FormInput';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useUser } from '@/contexts/UserContext';
 
 // Validation schema
 const schema = yup.object({
@@ -15,6 +17,10 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login } = useUser();
+  const redirectUrl = searchParams.get('redirect');
   const {
     register,
     handleSubmit,
@@ -37,21 +43,19 @@ export default function LoginPage() {
       const result = await response.json();
 
       if (response.ok) {
-        alert('Login successful! Welcome back.');
-        console.log('User logged in:', result.user);
-        console.log('Access token received:', result.accessToken);
+        // Use context login method to handle token and user data
+        await login(result.accessToken);
 
-        // Store user info and token in localStorage
-        localStorage.setItem('user', JSON.stringify(result.user));
-        localStorage.setItem('accessToken', result.accessToken);
-        localStorage.setItem('tokenType', result.tokenType);
-
-        // Redirect based on user role
-        if (result.user.role === 'creator') {
-          window.location.href = '/admin';
+        // Redirect to original URL if provided, otherwise redirect based on user role
+        if (redirectUrl) {
+          router.push(redirectUrl);
+        } else if (result.user.role === 'creator') {
+          router.push('/admin');
+        } else if (result.user.role === 'learner') {
+          router.push('/courses');
         } else {
           // Redirect to a default dashboard or home page for other roles
-          window.location.href = '/';
+          router.push('/');
         }
       } else {
         alert(`Login failed: ${result.error}${result.details ? ` - ${result.details}` : ''}`);
@@ -64,7 +68,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full space-y-8">
+      <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
