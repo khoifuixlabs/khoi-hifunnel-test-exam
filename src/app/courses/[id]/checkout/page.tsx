@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import FormInput from '@/components/FormInput';
 import Link from 'next/link';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
+import Loading from '@/components/Loading';
 
 // Public course interface (without sensitive data)
 interface PublicCourse {
@@ -55,6 +56,7 @@ export default function CheckoutPage() {
   const [course, setCourse] = useState<PublicCourse | null>(null);
   const [submitError, setSubmitError] = useState<string>('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoadingCourse, setIsLoadingCourse] = useState(true);
 
   const {
     register,
@@ -81,6 +83,7 @@ export default function CheckoutPage() {
   // Load course data
   useEffect(() => {
     const loadCourse = async () => {
+      setIsLoadingCourse(true);
       try {
         const response = await fetch(`/api/courses/${courseId}/public`);
         const result = await response.json();
@@ -92,6 +95,8 @@ export default function CheckoutPage() {
         }
       } catch (error) {
         console.error('Error loading course:', error);
+      } finally {
+        setIsLoadingCourse(false);
       }
     };
 
@@ -133,16 +138,14 @@ export default function CheckoutPage() {
     }
   };
 
-  // Show loading state
+  // Show loading state for auth
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
-      </div>
-    );
+    return <Loading />;
+  }
+
+  // Show loading state for course
+  if (isLoadingCourse) {
+    return <Loading />;
   }
 
   // Show success state
