@@ -1,0 +1,36 @@
+[
+  {
+    "id": "course-FM8md2Op",
+    "title": "Lập Trình JavaScript Cơ Bản 2.0",
+    "description": "Hello this is a new course",
+    "videoIntroUrl": "https://www.youtube.com/",
+    "document": {
+      "type": "text",
+      "content": "Hello"
+    },
+    "videos": [],
+    "registeredUsers": [
+      {
+        "id": "user-1",
+        "email": "john.doe@example.com",
+        "role": "learner",
+        "registeredAt": "2024-01-15T10:30:00Z",
+        "status": "active"
+      },
+      {
+        "id": "user-2",
+        "email": "jane.smith@example.com",
+        "role": "learner",
+        "registeredAt": "2024-01-16T14:20:00Z",
+        "status": "blocked"
+      },
+      {
+        "id": "user-3",
+        "email": "bob.wilson@example.com",
+        "role": "creator",
+        "registeredAt": "2024-01-17T09:15:00Z",
+        "status": "blocked"
+      }
+    ]
+  }
+]
