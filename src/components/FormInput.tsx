@@ -14,6 +14,7 @@ interface FormInputProps {
   defaultValue?: string;
   className?: string;
   rows?: number;
+  disabled?: boolean;
 }
 
 export default function FormInput({
@@ -29,6 +30,7 @@ export default function FormInput({
   defaultValue,
   className = '',
   rows = 3,
+  disabled = false,
 }: FormInputProps) {
   // Use the same border radius for all input types for consistency
   const borderRadiusClass = 'rounded-md';
@@ -38,6 +40,7 @@ export default function FormInput({
     ${error ? 'border-red-300' : 'border-gray-300'}
     placeholder-gray-500 text-gray-900 
     focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm
+    ${disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}
     ${borderRadiusClass}
     ${className}
   `.trim();
@@ -47,6 +50,7 @@ export default function FormInput({
     ${error ? 'border-red-300' : 'border-gray-300'}
     bg-white shadow-sm 
     focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black
+    ${disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}
     ${borderRadiusClass}
     ${className}
   `.trim();
@@ -56,6 +60,7 @@ export default function FormInput({
     ${error ? 'border-red-300' : 'border-gray-300'}
     placeholder-gray-500 text-gray-900
     focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm
+    ${disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}
     ${borderRadiusClass}
     ${className}
   `.trim();
@@ -75,7 +80,7 @@ export default function FormInput({
       )}
 
       {type === 'select' ? (
-        <select id={id} {...register} className={selectClasses} defaultValue={defaultValue || ''}>
+        <select id={id} {...register} className={selectClasses} defaultValue={defaultValue || ''} disabled={disabled}>
           {options?.map((option) => (
             <option key={option.value} value={option.value} disabled={option.value === ''}>
               {option.label}
@@ -83,9 +88,9 @@ export default function FormInput({
           ))}
         </select>
       ) : type === 'textarea' ? (
-        <textarea id={id} rows={rows} className={textareaClasses} placeholder={placeholder} {...register} />
+        <textarea id={id} rows={rows} className={textareaClasses} placeholder={placeholder} {...register} disabled={disabled} />
       ) : (
-        <input id={id} type={type} autoComplete={autoComplete} className={baseClasses} placeholder={placeholder} {...register} />
+        <input id={id} type={type} autoComplete={autoComplete} className={baseClasses} placeholder={placeholder} {...register} disabled={disabled} />
       )}
 
       {error && <p className="mt-1 text-sm text-red-600 mb-3">{error}</p>}

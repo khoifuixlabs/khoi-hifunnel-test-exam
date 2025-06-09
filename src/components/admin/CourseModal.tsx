@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { Course } from '@/types/course';
 import FormInput from '@/components/FormInput';
+import LoadingButton from '@/components/LoadingButton';
 
 type CourseFormData = Omit<Course, 'id'>;
 
@@ -12,9 +13,10 @@ interface CourseModalProps {
   onClose: () => void;
   onSubmit: (data: CourseFormData) => Promise<void>;
   editingCourse: Course | null;
+  isLoading?: boolean;
 }
 
-export default function CourseModal({ isOpen, onClose, onSubmit, editingCourse }: CourseModalProps) {
+export default function CourseModal({ isOpen, onClose, onSubmit, editingCourse, isLoading = false }: CourseModalProps) {
   const {
     register,
     handleSubmit: handleFormSubmit,
@@ -118,19 +120,18 @@ export default function CourseModal({ isOpen, onClose, onSubmit, editingCourse }
             />
 
             <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
+              <LoadingButton type="button" variant="secondary" onClick={handleClose} disabled={isLoading} className="px-4 py-2">
                 Cancel
-              </button>
-              <button
+              </LoadingButton>
+              <LoadingButton
                 type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                variant="primary"
+                isLoading={isLoading}
+                loadingText={editingCourse ? 'Updating...' : 'Creating...'}
+                className="px-4 py-2"
               >
                 {editingCourse ? 'Update Course' : 'Create Course'}
-              </button>
+              </LoadingButton>
             </div>
           </form>
         </div>

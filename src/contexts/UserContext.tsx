@@ -128,6 +128,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
+  // Redirect if user is authenticated and on /login or /register
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isAuthenticated && !isLoading) {
+      const path = window.location.pathname;
+      if (path === '/login' || path === '/register' || path.startsWith('/login/') || path.startsWith('/register/')) {
+        window.location.replace('/');
+      }
+    }
+  }, [isAuthenticated, isLoading]);
+
   const value: UserContextType = {
     user,
     isLoading,

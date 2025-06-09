@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import FormInput from '@/components/FormInput';
+import LoadingButton from '@/components/LoadingButton';
+import { useState } from 'react';
 
 // Validation schema
 const schema = yup.object({
@@ -16,6 +18,8 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 export default function RegisterPage() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -26,6 +30,7 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -48,6 +53,8 @@ export default function RegisterPage() {
     } catch (error) {
       console.error('Registration error:', error);
       alert('Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,6 +87,7 @@ export default function RegisterPage() {
               register={register('email')}
               error={errors.email?.message}
               className="rounded-t-md mb-2"
+              disabled={isLoading}
             />
 
             <FormInput
@@ -91,6 +99,7 @@ export default function RegisterPage() {
               register={register('password')}
               error={errors.password?.message}
               className="rounded-b-md"
+              disabled={isLoading}
             />
 
             <div className="mt-4">
@@ -103,17 +112,15 @@ export default function RegisterPage() {
                 error={errors.role?.message}
                 options={roleOptions}
                 defaultValue=""
+                disabled={isLoading}
               />
             </div>
           </div>
 
           <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
+            <LoadingButton type="submit" isLoading={isLoading} loadingText="Creating account...">
               Create account
-            </button>
+            </LoadingButton>
           </div>
         </form>
       </div>

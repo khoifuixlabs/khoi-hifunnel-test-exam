@@ -5,8 +5,10 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import FormInput from '@/components/FormInput';
+import LoadingButton from '@/components/LoadingButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
+import { useState } from 'react';
 
 // Validation schema
 const schema = yup.object({
@@ -21,6 +23,8 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const { login } = useUser();
   const redirectUrl = searchParams.get('redirect');
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -31,6 +35,7 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -63,6 +68,8 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Login error:', error);
       alert('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,6 +96,7 @@ export default function LoginPage() {
               register={register('email')}
               error={errors.email?.message}
               className="rounded-t-md"
+              disabled={isLoading}
             />
 
             <FormInput
@@ -100,16 +108,14 @@ export default function LoginPage() {
               register={register('password')}
               error={errors.password?.message}
               className="rounded-b-md"
+              disabled={isLoading}
             />
           </div>
 
           <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
+            <LoadingButton type="submit" isLoading={isLoading} loadingText="Signing in...">
               Sign in
-            </button>
+            </LoadingButton>
           </div>
         </form>
       </div>

@@ -14,6 +14,7 @@ export default function CoursesManagementPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [viewingCourse, setViewingCourse] = useState<Course | null>(null);
   const [managingUsersFor, setManagingUsersFor] = useState<Course | null>(null);
@@ -58,6 +59,7 @@ export default function CoursesManagementPage() {
   };
 
   const handleSubmit = async (data: CourseFormData) => {
+    setIsSubmitting(true);
     try {
       const url = editingCourse ? `/api/courses/${editingCourse.id}` : '/api/courses';
       const method = editingCourse ? 'PUT' : 'POST';
@@ -86,6 +88,8 @@ export default function CoursesManagementPage() {
     } catch (error) {
       console.error('Error saving course:', error);
       alert('Failed to save course. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -227,7 +231,7 @@ export default function CoursesManagementPage() {
         </div>
       </div>
 
-      <CourseModal isOpen={showModal} onClose={handleCloseModal} onSubmit={handleSubmit} editingCourse={editingCourse} />
+      <CourseModal isOpen={showModal} onClose={handleCloseModal} onSubmit={handleSubmit} editingCourse={editingCourse} isLoading={isSubmitting} />
 
       <CourseDetailsModal course={viewingCourse} isOpen={!!viewingCourse} onClose={handleCloseDetailsModal} />
 
