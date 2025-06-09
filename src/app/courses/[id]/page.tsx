@@ -5,15 +5,17 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon, PlayIcon, DocumentTextIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 
-interface CoursePageProps {
-  params: {
+// Define the structure for the page params
+interface PageProps {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
-  const course = await getCourse(params.id);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const course = await getCourse(resolvedParams.id);
 
   if (!course) {
     return {
@@ -34,8 +36,8 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   };
 }
 
-export default async function CoursePage({ params }: CoursePageProps) {
-  const course = await getCourse(params.id);
+export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
+  const course = await getCourse((await params).id);
 
   if (!course) {
     notFound();

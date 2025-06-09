@@ -4,8 +4,20 @@ import { Course, updateCourseSchema } from '@/types/course';
 import { readCoursesFile, writeCoursesFile } from '@/utils/courseFileUtils';
 import { verifyToken } from '@/lib/auth';
 
+// Helper to extract course ID from URL (for route handlers)
+function getCourseIdFromRequest(request: Request): string | undefined {
+  try {
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const coursesIndex = pathParts.findIndex((part) => part === 'courses');
+    return coursesIndex !== -1 && pathParts.length > coursesIndex + 1 ? pathParts[coursesIndex + 1] : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // GET - Get a single course by ID
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest) {
   try {
     // Verify JWT token
     const tokenPayload = verifyToken(request);
@@ -14,7 +26,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
     }
 
-    const { id } = params;
+    // Extract course ID from URL
+    const id = getCourseIdFromRequest(request);
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing course ID in URL' }, { status: 400 });
+    }
+
     const courses = readCoursesFile();
 
     const course = courses.find((c) => c.id === id);
@@ -39,7 +57,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT - Update a course by ID
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest) {
   try {
     // Verify JWT token
     const tokenPayload = verifyToken(request);
@@ -48,7 +66,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
     }
 
-    const { id } = params;
+    // Extract course ID from URL
+    const id = getCourseIdFromRequest(request);
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing course ID in URL' }, { status: 400 });
+    }
+
     const body = await request.json();
 
     // Validate the request data
@@ -110,7 +134,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE - Delete a course by ID
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest) {
   try {
     // Verify JWT token
     const tokenPayload = verifyToken(request);
@@ -119,7 +143,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
     }
 
-    const { id } = params;
+    // Extract course ID from URL
+    const id = getCourseIdFromRequest(request);
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing course ID in URL' }, { status: 400 });
+    }
 
     // Read existing courses
     const courses = readCoursesFile();

@@ -8,7 +8,7 @@ import FormInput from '@/components/FormInput';
 import LoadingButton from '@/components/LoadingButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
 // Validation schema
 const schema = yup.object({
@@ -18,7 +18,7 @@ const schema = yup.object({
 
 type FormData = yup.InferType<typeof schema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useUser();
@@ -74,6 +74,44 @@ export default function LoginPage() {
   };
 
   return (
+    <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+      <div className="-space-y-px">
+        <FormInput
+          id="email"
+          type="email"
+          label="Email address"
+          placeholder="Email address"
+          autoComplete="email"
+          register={register('email')}
+          error={errors.email?.message}
+          className="rounded-t-md"
+          disabled={isLoading}
+        />
+
+        <FormInput
+          id="password"
+          type="password"
+          label="Password"
+          placeholder="Password"
+          autoComplete="current-password"
+          register={register('password')}
+          error={errors.password?.message}
+          className="rounded-b-md"
+          disabled={isLoading}
+        />
+      </div>
+
+      <div>
+        <LoadingButton type="submit" isLoading={isLoading} loadingText="Signing in...">
+          Sign in
+        </LoadingButton>
+      </div>
+    </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
@@ -85,39 +123,9 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="-space-y-px">
-            <FormInput
-              id="email"
-              type="email"
-              label="Email address"
-              placeholder="Email address"
-              autoComplete="email"
-              register={register('email')}
-              error={errors.email?.message}
-              className="rounded-t-md"
-              disabled={isLoading}
-            />
-
-            <FormInput
-              id="password"
-              type="password"
-              label="Password"
-              placeholder="Password"
-              autoComplete="current-password"
-              register={register('password')}
-              error={errors.password?.message}
-              className="rounded-b-md"
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <LoadingButton type="submit" isLoading={isLoading} loadingText="Signing in...">
-              Sign in
-            </LoadingButton>
-          </div>
-        </form>
+        <Suspense fallback={<div className="text-center">Loading...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );

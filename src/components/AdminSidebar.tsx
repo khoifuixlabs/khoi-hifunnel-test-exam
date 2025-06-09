@@ -1,18 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import {
-  Bars3Icon,
-  XMarkIcon,
-  HomeIcon,
-  DocumentDuplicateIcon,
-  ArrowRightOnRectangleIcon,
-  BookOpenIcon,
-  UserGroupIcon,
-} from '@heroicons/react/24/outline';
 import { useUser } from '@/contexts/UserContext';
+import { ArrowRightOnRectangleIcon, Bars3Icon, BookOpenIcon, HomeIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface NavigationItem {
   name: string;

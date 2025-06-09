@@ -1,12 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { readCoursesFile } from '@/utils/courseFileUtils';
 
 // GET - Get a single course by ID (public access)
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: Request) {
   try {
-    const { id } = params;
-    const courses = readCoursesFile();
+    // Extract the course ID from the URL pathname
+    // Example: /api/courses/123/public
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    // Find the index of 'courses' and get the next part as the ID
+    const coursesIndex = pathParts.findIndex((part) => part === 'courses');
+    const id = coursesIndex !== -1 && pathParts.length > coursesIndex + 1 ? pathParts[coursesIndex + 1] : undefined;
 
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing course ID in URL' }, { status: 400 });
+    }
+
+    const courses = readCoursesFile();
     const course = courses.find((c) => c.id === id);
 
     if (!course) {

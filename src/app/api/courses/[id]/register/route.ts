@@ -4,8 +4,20 @@ import { verifyToken } from '@/lib/auth';
 import { RegisteredUser } from '@/types/course';
 
 // POST - Register user to a course
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
+    // Extract the course ID from the URL pathname
+    // Example: /api/courses/123/register
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    // Find the index of 'courses' and get the next part as the ID
+    const coursesIndex = pathParts.findIndex((part) => part === 'courses');
+    const courseId = coursesIndex !== -1 && pathParts.length > coursesIndex + 1 ? pathParts[coursesIndex + 1] : undefined;
+
+    if (!courseId) {
+      return NextResponse.json({ success: false, error: 'Missing course ID in URL' }, { status: 400 });
+    }
+
     // Verify JWT token
     const tokenPayload = verifyToken(request);
 
@@ -13,7 +25,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
     }
 
-    const { id: courseId } = params;
     const body = await request.json();
     const { checkoutInfo } = body;
 

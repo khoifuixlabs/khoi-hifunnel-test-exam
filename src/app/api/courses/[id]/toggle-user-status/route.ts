@@ -3,8 +3,19 @@ import { readCoursesFile, writeCoursesFile } from '@/utils/courseFileUtils';
 import { verifyToken } from '@/lib/auth';
 
 // PATCH - Toggle user status (active <-> blocked)
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest) {
   try {
+    // Extract the course ID from the URL pathname
+    // Example: /api/courses/123/toggle-user-status
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const coursesIndex = pathParts.findIndex((part) => part === 'courses');
+    const courseId = coursesIndex !== -1 && pathParts.length > coursesIndex + 1 ? pathParts[coursesIndex + 1] : undefined;
+
+    if (!courseId) {
+      return NextResponse.json({ success: false, error: 'Missing course ID in URL' }, { status: 400 });
+    }
+
     // Verify JWT token
     const tokenPayload = verifyToken(request);
 
@@ -12,7 +23,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ success: false, error: 'Unauthorized - Invalid or missing token' }, { status: 401 });
     }
 
-    const { id: courseId } = params;
     const body = await request.json();
     const { userId } = body;
 
